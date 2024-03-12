@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plus</title>
+</head>
+<body>
+    <form id="registrationForm">
+
+      <div>
+        <label for="name">Name</label>
+        <input id="name" type="text" name="name" class="rounded-md py-1 px-3 dark:bg-zinc-800 dark:text-zinc-300 border bg-zinc-50 border-zinc-300 dark:border-zinc-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:bg-zinc-900 focus:bg-white focus:ring-opacity-60" />
+    </div>
+    <div class="grid grid-cols-1 gap-2">
+        <label for="email" class="font-medium dark:text-zinc-300 text-zinc-900 text-sm">Email</label>
+        <input id="email" type="email" name="email" class="rounded-md py-1 px-3 dark:bg-zinc-800 dark:text-zinc-300 border bg-zinc-50 border-zinc-300 dark:border-zinc-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:bg-zinc-900 focus:bg-white focus:ring-opacity-60" />
+    </div>
+    <div class="grid grid-cols-1 gap-2">
+        <label for="password" class="font-medium dark:text-zinc-300 text-zinc-900 text-sm">Password</label>
+        <input id="password" type="password" name="password" class="rounded-md py-1 px-3 dark:bg-zinc-800 dark:text-zinc-300 border bg-zinc-50 border-zinc-300 dark:border-zinc-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:bg-zinc-900 focus:bg-white focus:ring-opacity-60" />
+    </div>
+        <div class="grid grid-cols-1 gap-2">
+            <label for="OP1">Choose Option 1:</label>
+            <select name="customField1" id="OP1" onchange="updateOptions()">
+                <option value="a">A</option>
+                <option value="b">B</option>
+            </select>
+        </div>
+
+        <div class="grid grid-cols-1 gap-2">
+            <label for="OP2">Choose Option 2:</label>
+            <select name="customField2" id="OP2">
+                <!-- Options will be dynamically added here -->
+            </select>
+        </div>
+
+        <div class="grid grid-cols-1 gap-2">
+            <label for="OP3">Choose Option 3:</label>
+            <select name="customField3" id="OP3">
+                <!-- Options will be dynamically added here -->
+            </select>
+        </div>
+
+        <button type="submit" onclick="submitForm()">Register</button>
+
+        <script>
+            async function updateOptions() {
+                try {
+                    const option1 = document.getElementById("OP1").value;
+                    const option2Dropdown = document.getElementById("OP2");
+                    const option3Dropdown = document.getElementById("OP3");
+
+                    // Clear existing options
+                    option2Dropdown.innerHTML = "";
+                    option3Dropdown.innerHTML = "";
+
+                    // Fetch options for Option 2
+                    const response2 = await fetch(`http://localhost:8080/api/options/${option1}`);
+                    const options2 = await response2.json();
+
+                    options2.forEach((option) => {
+                        addOption(option.value, option.text, option2Dropdown);
+                    });
+
+                    // Fetch options for Option 3
+                    const response3 = await fetch(`http://localhost:8080/api/options/${option2Dropdown.value}`);
+                    const options3 = await response3.json();
+
+                    options3.forEach((option) => {
+                        addOption(option.value, option.text, option3Dropdown);
+                    });
+                } catch (error) {
+                    console.error("Error fetching options:", error);
+                }
+            }
+
+            function addOption(value, text, dropdown) {
+                const option = document.createElement("option");
+                option.value = value;
+                option.text = text;
+                dropdown.add(option);
+            }
+
+            function submitForm() {
+              event.preventDefault();
+
+              
+                const form = document.getElementById("registrationForm");
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData);
+                console.log("Form data:", data);
+
+                const requestOptions = {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(data)
+                };
+
+                fetch('http://localhost:8080/api/auth/register', requestOptions)
+                  .then(response => response.json())
+                  .then(result => console.log("Response:", result))
+                  .catch(error => console.error("Error:", error));
+            }
+        </script>
+    </form>
+</body>
+</html>
